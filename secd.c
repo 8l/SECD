@@ -66,38 +66,84 @@ typedef  struct secd    secd_t;
 typedef  struct cell    cell_t;
 typedef  unsigned long  index_t;
 
-typedef  struct atom  atom_t;
+typedef  union  atom  atom_t;
 typedef  struct cons  cons_t;
 typedef  struct error error_t;
+
+typedef  struct number  number_t;
+typedef  struct symbol  symbol_t;
+typedef  struct string  string_t;
+typedef  struct opcode  opcode_t;
+typedef  struct closure closure_t;
+typedef  struct vector  vector_t;
+typedef  struct bytes   bytes_t;
+typedef  struct port    port_t;
+
+struct number {
+    int val;
+};
+
+struct symbol {
+    cell_t *str;
+};
+
+struct string {
+    size_t bytesize;
+    intptr_t hash;
+};
+
+struct opcode {
+    secd_opfunc_t *fun;
+    cell_t *control;
+};
+
+struct vector {
+    size_t cellsize;
+};
+
+struct bytes {
+    size_t bytesize;
+};
+
+struct port {
+    FILE *file;
+};
+
+struct closure {
+    cell_t *args;   // symbols
+    cell_t *body;   // opcode vector | symbol list
+};
+struct closure_suppl {
+    cell_t *freevars; // free variables
+};
 
 typedef cell_t* (*secd_opfunc_t)(secd_t *);
 typedef cell_t* (*secd_nativefunc_t)(secd_t *, cell_t *);
 
 enum cell_type {
-    CELL_UNDEF,
-    CELL_ATOM,
-    CELL_CONS,
+    CELL_UNDEF,     // uninitiliazed
+    CELL_CONS,      // cons
+    CELL_PAIR,      // pair
     CELL_ERROR,
+    CELL_ATOM_NUM,  // a number
+    CELL_ATOM_SYM,  // a symbol
+    CELL_ATOM_STR,  // a string
+    CELL_ATOM_OP,   // native routine
+    CELL_ATOM_CLOS, // callable
+    CELL_ATOM_VEC,  // vector
+    CELL_ATOM_BYTES, // bytearray
+    CELL_ATOM_PORT, // port
 };
 
-enum atom_type {
-    NOT_AN_ATOM,
-    ATOM_INT,
-    ATOM_SYM,
-    ATOM_FUNC,
-};
-
-struct atom {
-    enum atom_type type;
-    union {
-        int num;
-        struct {
-            size_t size;
-            const char *data;
-        } sym;
-
-        void *ptr;
-    } as;
+union atom {
+    number_t num,
+    symbol_t sym,
+    string_t str,
+    opcode_t op,
+    closure_t clos,
+    vector_t vec,
+    bytes_t bytes,
+    port_t port
 };
 
 struct cons {
@@ -115,13 +161,12 @@ struct cell {
     //      bits 0 .. SECD_ALIGN-1          - enum cell_type
     //      bits SECD_ALIGN .. CHAR_BIT * (sizeof(intptr_t)-1)   - (secd_t *)
     intptr_t type;
+    size_t nref;
     union {
         atom_t  atom;
         cons_t  cons;
         error_t err;
     } as;
-
-    size_t nref;
 };
 
 // must be aligned at 1<<SECD_ALIGN
@@ -1017,6 +1062,8 @@ cell_t *secdf_ctl(secd_t *secd, cell_t *args) {
             printf("SECDCTL: Available cells: %lu\n", secd->free_cells);
         } else if (str_eq(symname(arg1), "env")) {
             print_env(secd);
+        } else if (str_eq(symname(arg1), "dump")) {
+            return secd->dump;
         } else if (str_eq(symname(arg1), "help")) {
             printf("SECDCTL: options are 'help', 'env', 'free'\n");
         }

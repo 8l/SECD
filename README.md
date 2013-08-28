@@ -45,7 +45,7 @@ The current opcode set and the operational semantics is:
                                            (nil, (zip argnames argvals).e1, c1, s.e.c.d)
     RTN     :      (v, e, nil, s0.e0.c0.d) -> (v.s0, e0, c0, d)
     DUM     :      (s, e, c, d)            -> (s, dummy.e, c, d)
-    RAP     :      ((c'.e').v'.s, e, c, d) -> (nil, frame(v').e', c', (s, # todo
+    RAP     :      ((c'.e').v'.s, e, c, d) -> (nil, frame(v').e', c', s.e.c.d)
 
     PRINT   :     side-effect of printing the head of S
     READ    :     puts the input s-expression on top of S
