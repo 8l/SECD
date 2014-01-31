@@ -118,9 +118,14 @@ struct atom {
     enum atom_type type;
     union {
         int num;
-        struct {
-            size_t size;
-            const char *data;
+        union {
+            struct {
+                char data[ 0 ];
+            } inln;
+            struct {
+                bool inln:8;    // if not 0, sym area is char[]
+                cell_t *str;
+            } ref;
         } sym;
 
         opindex_t op;
@@ -239,7 +244,9 @@ inline static long cell_index(secd_t *secd, const cell_t *cons) {
 }
 
 inline static const char * symname(const cell_t *c) {
-    return c->as.atom.as.sym.data;
+    if (c->as.atom.as.sym.ref.inln)
+        return (char *)&c->as.atom.as.sym;
+    return c->as.atom.as.sym.ref.str->as.str.data;
 }
 
 inline static const char * errmsg(const cell_t *err) {
@@ -287,14 +294,25 @@ inline static bool is_error(const cell_t *cell) {
     return cell_type(cell) == CELL_ERROR;
 }
 
-#define INIT_SYM(name) {    \
+#define INIT_STR(name)  {   \
+    .type = CELL_STR,       \
+    .nref = DONT_FREE_THIS, \
+    .as.str = {             \
+      .data = name          \
+    }}
+
+
+#define INIT_SYM(strcell) {    \
     .type = CELL_ATOM,      \
     .nref = DONT_FREE_THIS, \
     .as.atom = {            \
-      .type = ATOM_SYM,     \
-      .as.sym = {           \
-        .size = sizeof(name) - 1, \
-        .data = (name) } } }
+      .as.sym.ref = {      \
+        .inln = 0,      \
+        .str = &strcell }}}
+
+#define DEFINE_SYM(sym, name) \
+const cell_t sym##_str = INIT_STR(name);   \
+const cell_t sym = INIT_SYM(sym##_str);
 
 #define INIT_NUM(num) {     \
     .type = CELL_ATOM,      \

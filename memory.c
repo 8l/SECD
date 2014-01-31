@@ -74,20 +74,18 @@ cell_t *init_with_copy(secd_t *secd,
     return cell;
 }
 
-void free_atom(cell_t *cell) {
-    switch (cell->as.atom.type) {
-      case ATOM_SYM:
-        if (cell->as.atom.as.sym.size != DONT_FREE_THIS)
-            free((char *)cell->as.atom.as.sym.data); break;
-      default: return;
-    }
-}
-
 cell_t *drop_dependencies(secd_t *secd, cell_t *c) {
     enum cell_type t = cell_type(c);
     switch (t) {
       case CELL_ATOM:
-        free_atom(c);
+        switch (atom_type(secd, c)) {
+          case ATOM_SYM:
+            if (c->as.atom.as.sym.ref.inln) {
+                cell_t *str = c->as.atom.as.sym.ref.str;
+                drop_cell(secd, str);
+            }
+          default: return;
+        }
         break;
       case CELL_STR:
         drop_cell(secd, arr_meta((cell_t *)strmem(c)));
@@ -340,8 +338,13 @@ cell_t *new_symbol(secd_t *secd, const char *sym) {
     cell_t *cell = pop_free(secd);
     cell->type = CELL_ATOM;
     cell->as.atom.type = ATOM_SYM;
-    cell->as.atom.as.sym.size = strlen(sym);
-    cell->as.atom.as.sym.data = strdup(sym);
+
+    if ((strlen(sym) + 1) < (sizeof(cell_t) - offsetof(cell_t, as.atom.as.sym.inln.data))) {
+        strcpy(cell->as.atom.as.sym.inln.data, sym);
+    } else {
+        cell->as.atom.as.sym.ref.inln = false;
+        cell->as.atom.as.sym.ref.str = share_cell(secd, new_string(secd, sym));
+    }
     return cell;
 }
 

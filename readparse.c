@@ -22,7 +22,7 @@ void print_opcode(opindex_t op) {
 void sexp_print_atom(secd_t *secd, const cell_t *c) {
     switch (atom_type(secd, c)) {
       case ATOM_INT: printf("%d", c->as.atom.as.num); break;
-      case ATOM_SYM: printf("%s", c->as.atom.as.sym.data); break;
+      case ATOM_SYM: printf("%s", symname(c)); break;
       case ATOM_OP: print_opcode(c->as.atom.as.op); break;
       case ATOM_FUNC: printf("*%p()", c->as.atom.as.ptr); break;
       case NOT_AN_ATOM: printf("???");

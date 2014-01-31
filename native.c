@@ -499,30 +499,30 @@ cell_t *secdf_lst2str(secd_t *secd, cell_t *args) {
  */
 
 /* misc */
-const cell_t nump_sym   = INIT_SYM("number?");
-const cell_t symp_sym   = INIT_SYM("symbol?");
-const cell_t eofp_sym   = INIT_SYM("eof-object?");
-const cell_t debug_sym  = INIT_SYM("secd");
-const cell_t env_sym    = INIT_SYM("interaction-environment");
-const cell_t bind_sym   = INIT_SYM("secd-bind!");
+DEFINE_SYM(nump_sym   ,"number?");
+DEFINE_SYM(symp_sym   ,"symbol?");
+DEFINE_SYM(eofp_sym   ,"eof-object?");
+DEFINE_SYM(debug_sym  ,"secd");
+DEFINE_SYM(env_sym    ,"interaction-environment");
+DEFINE_SYM(bind_sym   ,"secd-bind!");
 /* list routines */
-const cell_t list_sym   = INIT_SYM("list");
-const cell_t append_sym = INIT_SYM("append");
-const cell_t copy_sym   = INIT_SYM("list-copy");
-const cell_t nullp_sym  = INIT_SYM("null?");
+DEFINE_SYM(list_sym   ,"list");
+DEFINE_SYM(append_sym ,"append");
+DEFINE_SYM(copy_sym   ,"list-copy");
+DEFINE_SYM(nullp_sym  ,"null?");
 /* vector routines */
-const cell_t vp_sym     = INIT_SYM("vector?");
-const cell_t vmake_sym  = INIT_SYM("make-vector");
-const cell_t vref_sym   = INIT_SYM("vector-ref");
-const cell_t vset_sym   = INIT_SYM("vector-set!");
-const cell_t vlist_sym  = INIT_SYM("list->vector");
+DEFINE_SYM(vp_sym     ,"vector?");
+DEFINE_SYM(vmake_sym  ,"make-vector");
+DEFINE_SYM(vref_sym   ,"vector-ref");
+DEFINE_SYM(vset_sym   ,"vector-set!");
+DEFINE_SYM(vlist_sym  ,"list->vector");
 /* string functions */
-const cell_t sp_sym     = INIT_SYM("string?");
-const cell_t strlen_sym = INIT_SYM("string-length");
-const cell_t symstr_sym = INIT_SYM("symbol->string");
-const cell_t strsym_sym = INIT_SYM("string->symbol");
-const cell_t strlst_sym = INIT_SYM("string->list");
-const cell_t lststr_sym = INIT_SYM("list->string");
+DEFINE_SYM(sp_sym     ,"string?");
+DEFINE_SYM(strlen_sym ,"string-length");
+DEFINE_SYM(symstr_sym ,"symbol->string");
+DEFINE_SYM(strsym_sym ,"string->symbol");
+DEFINE_SYM(strlst_sym ,"string->list");
+DEFINE_SYM(lststr_sym ,"list->string");
 
 const cell_t list_func  = INIT_FUNC(secdf_list);
 const cell_t appnd_func = INIT_FUNC(secdf_append);
@@ -548,13 +548,13 @@ const cell_t symstr_fun = INIT_FUNC(secdf_sym2str);
 const cell_t strlst_fun = INIT_FUNC(secdf_str2lst);
 const cell_t lststr_fun = INIT_FUNC(secdf_lst2str);
 
-const cell_t t_sym      = INIT_SYM("#t");
-const cell_t f_sym      = INIT_SYM("#f");
-const cell_t nil_sym    = INIT_SYM("NIL");
+DEFINE_SYM(t_sym      ,"#t");
+DEFINE_SYM(f_sym      ,"#f");
+DEFINE_SYM(nil_sym    ,"NIL");
 
-const cell_t err_sym        = INIT_SYM("error:generic");
-const cell_t err_nil_sym    = INIT_SYM("error:nil");
-const cell_t err_oom        = INIT_SYM("error:out_of_memory");
+DEFINE_SYM(err_sym        ,"error:generic");
+DEFINE_SYM(err_nil_sym    ,"error:nil");
+DEFINE_SYM(err_oom        ,"error:out_of_memory");
 
 const struct {
     const cell_t *sym;
