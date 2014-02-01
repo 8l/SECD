@@ -64,8 +64,13 @@ cell_t *init_with_copy(secd_t *secd,
       case CELL_STR:
         share_cell(secd, arr_meta(with->as.arr.data));
         break;
-      case CELL_ERROR:
       case CELL_ATOM:
+        if (atom_type(secd, with) == ATOM_SYM) {
+            if (!is_sym_inln(with))
+                share_cell(secd, sym_strref(with));
+        }
+        break;
+      case CELL_ERROR:
       case CELL_UNDEF:
         break;
       case CELL_ARRMETA: case CELL_FREE:
@@ -84,7 +89,7 @@ cell_t *drop_dependencies(secd_t *secd, cell_t *c) {
                 cell_t *str = c->as.atom.as.sym.ref.str;
                 drop_cell(secd, str);
             }
-          default: return;
+          default: return c;
         }
         break;
       case CELL_STR:
@@ -339,8 +344,9 @@ cell_t *new_symbol(secd_t *secd, const char *sym) {
     cell->type = CELL_ATOM;
     cell->as.atom.type = ATOM_SYM;
 
-    if ((strlen(sym) + 1) < (sizeof(cell_t) - offsetof(cell_t, as.atom.as.sym.inln.data))) {
-        strcpy(cell->as.atom.as.sym.inln.data, sym);
+    if ((strlen(sym) + 2) < INLN_CHARS) {
+        char *inln = cell->as.atom.as.sym.inln.data;
+        strcpy(inln, sym);
     } else {
         cell->as.atom.as.sym.ref.inln = false;
         cell->as.atom.as.sym.ref.str = share_cell(secd, new_string(secd, sym));

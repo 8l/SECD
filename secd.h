@@ -114,13 +114,19 @@ enum atom_type {
     ATOM_FUNC,
 };
 
+
+/* this is implicitly
+ *    sizeof(cell_t) - offsetof(cell_t, as.atom.as.sym.inln.data)
+ */
+#define INLN_CHARS  (2 * sizeof(size_t))
+
 struct atom {
-    enum atom_type type;
-    union {
+    enum atom_type type;        // 1 word, 4b for 32-bit machines
+    union {                     // up to 3 words: 12b on 32-bit machines
         int num;
         union {
             struct {
-                char data[ 0 ];
+                char data[ INLN_CHARS ]; // first byte must not be '\0'!
             } inln;
             struct {
                 bool inln:8;    // if not 0, sym area is char[]
@@ -173,6 +179,9 @@ struct cell {
         cell_t *ref;
     } as;
 };
+
+//#define INLN_CHARS (sizeof(cell_t) - offsetof(cell_t, as.atom.as.sym.inln.data))
+//typedef char inlnstr_t[INLN_CHARS];
 
 typedef  struct secd_stat  secd_stat_t;
 
@@ -243,10 +252,18 @@ inline static long cell_index(secd_t *secd, const cell_t *cons) {
     return cons - secd->begin;
 }
 
+inline static bool is_sym_inln(const cell_t *c) {
+    return c->as.atom.as.sym.ref.inln;
+}
+
+inline static cell_t *sym_strref(cell_t *c) {
+    return c->as.atom.as.sym.ref.str;
+}
+
 inline static const char * symname(const cell_t *c) {
-    if (c->as.atom.as.sym.ref.inln)
-        return (char *)&c->as.atom.as.sym;
-    return c->as.atom.as.sym.ref.str->as.str.data;
+    if (is_sym_inln(c));
+        return (const char *)&c->as.atom.as.sym;
+    return (const char *)c->as.atom.as.sym.ref.str->as.str.data;
 }
 
 inline static const char * errmsg(const cell_t *err) {
@@ -308,7 +325,7 @@ inline static bool is_error(const cell_t *cell) {
     .as.atom = {            \
       .as.sym.ref = {      \
         .inln = 0,      \
-        .str = &strcell }}}
+        .str = (cell_t *)&strcell }}}
 
 #define DEFINE_SYM(sym, name) \
 const cell_t sym##_str = INIT_STR(name);   \
