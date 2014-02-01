@@ -261,7 +261,7 @@ inline static cell_t *sym_strref(cell_t *c) {
 }
 
 inline static const char * symname(const cell_t *c) {
-    if (is_sym_inln(c));
+    if (is_sym_inln(c))
         return (const char *)&c->as.atom.as.sym;
     return (const char *)c->as.atom.as.sym.ref.str->as.str.data;
 }
